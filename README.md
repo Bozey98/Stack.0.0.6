@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Bozey98/stack_example.svg?branch=master)](https://travis-ci.org/Bozey98/stack_example)
+[![Build Status](https://travis-ci.org/Bozey98/Stack0.0.2.svg?branch=master)](https://travis-ci.org/Bozey98/Stack0.0.2)
 stack methods:
 - [x] push
 - [x] pop
