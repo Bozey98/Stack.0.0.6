@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/Bozey98/stack_example.svg?branch=master)](https://travis-ci.org/Bozey98/stack_example)
-matrix methods:
+stack methods:
 - [x] push
 - [x] pop
 
