@@ -13,16 +13,18 @@ private:
 	size_t count_;
 
 public:
-	Stack();
-	Stack(const Stack<T>& Object);
-	size_t count() const;
-	size_t array_size() const;
-	void push(T const &);
-	T pop();
-	T last() const;
-	void print();
-	Stack<T>& operator=(const Stack<T>& Object);
-	void swap(Stack<T>&);
+	Stack(); /*noexpect*/
+	Stack(const Stack<T>& Object); /*unsafe*/
+	size_t count() const; /*noexpect*/
+	size_t array_size() const; /*noexpect*/
+	void push(T const &); /*unsafe*/
+	void pop(); /*unsafe*/
+	T top() /*strong*/;
+	T last() const; /*strong*/
+	void print(); /*unsafe*/
+	Stack<T>& operator=(const Stack<T>& Object); /*unsafe*/
+	void swap(Stack<T>&); /*noexpect*/
+	bool empty() const /*noexpect*/;
 
 
 
@@ -80,14 +82,21 @@ void Stack<T>::push(T const& value) {
 }
 
 template <typename T>
-T Stack<T>::pop() {
+void Stack<T>::pop() {
 
-	if (count_ == 0)
+	if (empty()) 
+		throw "Stack is empty" ;
+	count_--;
+}
+
+template <typename T>
+T Stack<T>::top() {
+
+	if (empty())
 	{
-		throw "Stack is empty!";
+		std::cout << "Stack is empty!";
 	}
-	T result = array_[count_--];
-	return result;
+	return array_[count_ --];
 }
 
 template <typename T>
@@ -123,4 +132,9 @@ void Stack<T>::swap(Stack<T>& Object)
 	std::swap(array_, Object.array_);
 	std::swap(array_size_, Object.array_size_);
 	std::swap(count_, Object.count_);
+}
+
+template <typename T>
+bool Stack<T>::empty() const {
+	return (count_ == 0);
 }
