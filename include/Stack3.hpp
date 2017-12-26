@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string>
 #include <mutex>
+#include <condition_variable>
+
 
 using namespace std;
 
@@ -15,6 +17,7 @@ private:
 	size_t array_size_;
 	size_t count_;
 	mutable mutex mutex_;
+	condition_variable cVar;
 
 public:
 	Stack(); /*noexpect*/
@@ -22,12 +25,16 @@ public:
 	size_t count() const; /*noexpect*/
 	size_t array_size() const; /*noexpect*/
 	void push(T const &); /*unsafe ---> strong*/ 
-	auto pop()->std::shared_ptr<T>;
+	//auto pop()->std::shared_ptr<T>;
 	T last() const; /*strong*/
 	void print(); /*strong*/
 	Stack<T>& operator=(const Stack<T>& Object); /*strong*/
 	void swap(Stack<T>&); /*noexpect*/
 	bool empty() const /*noexpect*/;
+
+	auto try_pop(const Stack<T>&)->shared_ptr<T>;
+	auto wait_and_pop()->shared_ptr<T>;
+
 
 
 
@@ -47,7 +54,7 @@ template <typename T>
 Stack<T>::Stack(const Stack<T>& Object)
 {
 
-	lock_guard<mutex> lock(Object.mutex_);
+	std::lock_guard<mutex> lock(Object.mutex_);
 	T* temp = new T[Object.array_size_];
 	array_size_ = Object.array_size_;
 	count_ = Object.count_;
@@ -69,7 +76,7 @@ Stack<T>::Stack(const Stack<T>& Object)
 
 template <typename T>
 size_t Stack<T>::count() const {
-	lock_guard<mutex> lock(mutex_);
+	std::lock_guard<mutex> lock(mutex_);
 	return count_;
 
 }
@@ -77,7 +84,7 @@ size_t Stack<T>::count() const {
 
 template <typename T>
 size_t Stack<T>::array_size() const {
-	lock_guard<mutex> lock(mutex_);
+	std::lock_guard<mutex> lock(mutex_);
 	return array_size_;
 
 }
@@ -112,7 +119,7 @@ void Stack<T>::push(T const& value) {
 	array_[count_++] = value;
 }
 
-template <typename T>
+/*template <typename T>
 auto Stack<T>::pop() -> std::shared_ptr<T>
 {
 	std::lock_guard<mutex> lock(mutex_);
@@ -126,7 +133,7 @@ auto Stack<T>::pop() -> std::shared_ptr<T>
 	--count_;
 
 	return top;
-}
+}*/
 
 template <typename T>
 T Stack<T>::last()const
@@ -139,7 +146,6 @@ T Stack<T>::last()const
 template <typename T>
 void Stack<T>::print()
 {
-	lock_guard<std::mutex> lock(mutex_);
 	for (unsigned int i = 0; i < count_; ++i)
 		cout << array_[i] << " ";
 	cout << endl;
@@ -149,7 +155,6 @@ void Stack<T>::print()
 template<typename T>
 Stack<T>& Stack<T>::operator=(const Stack<T>& Object)
 {
-	lock_guard<std::mutex> lock(Object.mutex_);
 	if (&Object != this)
 		Stack(Object).swap(*this);
 	return *this;
@@ -173,6 +178,29 @@ bool Stack<T>::empty() const {
 	return (count_ == 0);
 }
 
+
+template <typename T>
+auto Stack<T>::try_pop(const Stack<T>&Object) -> shared_ptr<T>
+{
+	lock_guard<std::mutex> lock(mutex_);
+	if (count_ == 0)
+		return nullptr;
+	--copy.count_;
+	return  make_shared<T>(array_[Object.count_]);
+}
+
+
+template <typename T>
+auto Stack<T>::wait_and_pop() -> shared_ptr<T>
+{
+	unique_lock<mutex> lock(mutex_);
+	while (!count_)
+	{
+		cVar.wait(lock);
+	}
+	--count_;
+	return make_shared<T>(array_[count_]);
+}
 
 
 int main() {
