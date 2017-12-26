@@ -139,6 +139,7 @@ T Stack<T>::last()const
 template <typename T>
 void Stack<T>::print()
 {
+	lock_guard<std::mutex> lock(mutex_);
 	for (unsigned int i = 0; i < count_; ++i)
 		cout << array_[i] << " ";
 	cout << endl;
