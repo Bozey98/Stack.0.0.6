@@ -57,7 +57,7 @@ Stack<T>::Stack(const Stack<T>& Object)
 
 	catch (...)
 	{
-		std::cerr << "ERROR" << std::endl;
+		cerr << "ERROR" << endl;
 		delete[] array_;
 		throw;
 	}
@@ -98,7 +98,7 @@ void Stack<T>::push(T const& value) {
 
 		catch (std::bad_alloc)
 		{
-			std::cerr << "bad_alloc caught" << endl;
+			cerr << "bad_alloc caught" << endl;
 		}
 
 	}
