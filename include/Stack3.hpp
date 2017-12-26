@@ -1,3 +1,5 @@
+#define _SCL_SECURE_NO_WARNINGS
+
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -14,15 +16,15 @@ private:
 
 public:
 	Stack(); /*noexpect*/
-	Stack(const Stack<T>& Object); /*unsafe*/
+	Stack(const Stack<T>& Object); /*unsafe ---> strong*/  
 	size_t count() const; /*noexpect*/
 	size_t array_size() const; /*noexpect*/
-	void push(T const &); /*unsafe*/
+	void push(T const &); /*unsafe ---> strong*/ 
 	void pop(); /*strong*/
 	T top() /*strong*/;
 	T last() const; /*strong*/
-	void print(); /*basic*/
-	Stack<T>& operator=(const Stack<T>& Object); /*unsafe*/
+	void print(); /*strong*/
+	Stack<T>& operator=(const Stack<T>& Object); /*strong*/
 	void swap(Stack<T>&); /*noexpect*/
 	bool empty() const /*noexpect*/;
 
@@ -43,9 +45,22 @@ Stack<T>::Stack() {
 template <typename T>
 Stack<T>::Stack(const Stack<T>& Object)
 {
+	T* temp = new T[Object.array_size_];
 	array_size_ = Object.array_size_;
 	count_ = Object.count_;
-	copy(Object.array_, Object.array_ + count_, array_);
+	array_ = temp;
+
+	try
+	{
+		copy(Object.array_, Object.array_ + count_, array_);
+	}
+
+	catch (...)
+	{
+		std::cerr << "ERROR" << std::endl;
+		delete[] array_;
+		throw;
+	}
 }
 
 
@@ -72,11 +87,20 @@ void Stack<T>::push(T const& value) {
 	}
 	else if (array_size_ == count_)
 	{
-		array_size_ *= 2;
-		T * array_new = new T[array_size_]();
-		copy(array_, array_ + count_, array_new);
-		delete[] array_;
-		array_ = array_new;
+
+		try {
+			array_size_ *= 2;
+			T * array_new = new T[array_size_]();
+			copy(array_, array_ + count_, array_new);
+			delete[] array_;
+			array_ = array_new;
+		}
+
+		catch (std::bad_alloc)
+		{
+			std::cerr << "bad_alloc caught" << endl;
+		}
+
 	}
 	array_[count_++] = value;
 }
@@ -84,8 +108,8 @@ void Stack<T>::push(T const& value) {
 template <typename T>
 void Stack<T>::pop() {
 
-	if (empty()) 
-		throw "Stack is empty" ;
+	if (empty())
+		throw "Stack is empty";
 	count_--;
 }
 
@@ -96,7 +120,7 @@ T Stack<T>::top() {
 	{
 		std::cout << "Stack is empty!";
 	}
-	return array_[count_ --];
+	return array_[count_--];
 }
 
 template <typename T>
@@ -118,11 +142,11 @@ void Stack<T>::print()
 
 template<typename T>
 Stack<T>& Stack<T>::operator=(const Stack<T>& Object)
- {
+{
 	if (&Object != this)
 		Stack(Object).swap(*this);
 	return *this;
-	}
+}
 
 
 
