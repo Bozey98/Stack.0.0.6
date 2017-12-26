@@ -149,6 +149,7 @@ void Stack<T>::print()
 template<typename T>
 Stack<T>& Stack<T>::operator=(const Stack<T>& Object)
 {
+	lock_guard<std::mutex> lock(Object.mutex_);
 	if (&Object != this)
 		Stack(Object).swap(*this);
 	return *this;
