@@ -18,10 +18,10 @@ public:
 	size_t count() const; /*noexpect*/
 	size_t array_size() const; /*noexpect*/
 	void push(T const &); /*unsafe*/
-	void pop(); /*unsafe*/
+	void pop(); /*strong*/
 	T top() /*strong*/;
 	T last() const; /*strong*/
-	void print(); /*unsafe*/
+	void print(); /*basic*/
 	Stack<T>& operator=(const Stack<T>& Object); /*unsafe*/
 	void swap(Stack<T>&); /*noexpect*/
 	bool empty() const /*noexpect*/;
